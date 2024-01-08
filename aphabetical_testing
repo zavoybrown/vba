@@ -1,0 +1,106 @@
+Sub stock_price()
+
+Dim ws As Worksheet
+
+For Each ws In alphabetical_testing.Sheets
+
+Dim WorksheetName As String
+WorksheetName = ws.Name
+ws.Cells(1, 11).Value = "Ticker"
+ws.Cells(1, 12).Value = "Yearly Change"
+ws.Cells(1, 13).Value = "Percent Change"
+ws.Cells(1, 14).Value = "Total Volume"
+ws.Cells(1, 18).Value = "Ticker"
+ws.Cells(1, 19).Value = "Value"
+ws.Cells(2, 17).Value = "Greatest % Increase"
+ws.Cells(3, 17).Value = "Greatest % Decrease"
+ws.Cells(4, 17).Value = "Greatest Total Volume"
+
+Dim ticker_symbol As String
+Dim Summary_Table_Row As Integer
+Summary_Table_Row = 2
+Dim total_volume As LongLong
+Dim LastRow As Long
+Dim closing_price As Double
+Dim opening_price As Double
+Dim greatest_increase As Double
+Dim greatest_increase_ticker As String
+Dim greatest_decrease_ticker As String
+Dim greatest_decrease As Double
+Dim greatest_volume As LongLong
+Dim greatest_volume_ticker As String
+
+
+total_volume = 0
+opening_price = 0
+closing_price = 0
+greatest_increase = 0
+greatest_decrease = 0
+greatest_volume = 0
+
+LastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+
+For i = 2 To LastRow
+    If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+        opening_price = ws.Cells(i, 3).Value
+    ElseIf ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        ticker_symbol = ws.Cells(i, 1).Value
+        total_volume = total_volume + ws.Cells(i, 7).Value
+        closing_price = ws.Cells(i, 6).Value
+        Range("K" & Summary_Table_Row).Value = ticker_symbol
+        Range("N" & Summary_Table_Row).Value = total_volume
+        Range("L" & Summary_Table_Row).Value = (closing_price - opening_price)
+        Range("M" & Summary_Table_Row).NumberFormat = "0.00%"
+        Range("M" & Summary_Table_Row).Value = (closing_price - opening_price) / Abs(opening_price)
+        
+    If ws.Cells(Summary_Table_Row, "L").Value < 0 Then
+        ws.Cells(Summary_Table_Row, "L").Interior.ColorIndex = 3
+        ws.Cells(Summary_Table_Row, "M").Interior.ColorIndex = 3
+    Else
+        ws.Cells(Summary_Table_Row, "L").Interior.ColorIndex = 4
+        ws.Cells(Summary_Table_Row, "M").Interior.ColorIndex = 4
+    End If
+      
+        Summary_Table_Row = Summary_Table_Row + 1
+        total_volume = 0
+        closing_price = 0
+        
+        
+    Else
+        total_volume = total_volume + ws.Cells(i, 7).Value
+
+    End If
+    
+ 
+Next i
+
+greatest_increase = ws.Cells(2, 13).Value
+
+For i = 3 To LastRow
+   If ws.Cells(i, 13).Value > greatest_increase Then
+        greatest_increase = ws.Cells(i, 13).Value
+        greatest_increase_ticker = ws.Cells(i, 11).Value
+    ElseIf ws.Cells(i, 13).Value < greatest_decrease Then
+        greatest_decrease = ws.Cells(i, 13).Value
+        greatest_decrease_ticker = ws.Cells(i, 11).Value
+    ElseIf ws.Cells(i, 14).Value > greatest_volume Then
+        greatest_volume = ws.Cells(i, 14).Value
+        greatest_volume_ticker = ws.Cells(i, 11).Value
+    End If
+Next i
+
+ws.Cells(2, 18).Value = greatest_increase_ticker
+ws.Cells(2, 19).Value = greatest_increase
+ws.Cells(2, 19).NumberFormat = "0.00%"
+ws.Cells(3, 18).Value = greatest_decrease_ticker
+ws.Cells(3, 19).Value = greatest_decrease
+ws.Cells(3, 19).NumberFormat = "0.00%"
+ws.Cells(4, 18).Value = greatest_volume_ticker
+ws.Cells(4, 19).Value = greatest_volume
+
+    
+ Next ws
+ 
+
+End Sub
